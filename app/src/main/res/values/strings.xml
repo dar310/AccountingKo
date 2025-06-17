@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">AccountingKo</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Username Placeholder</string>
+    <string name="nav_header_subtitle">emailaddress@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Manage Entry</string>
+    <string name="menu_slideshow">Other option (placeholder)</string>
+</resources>
