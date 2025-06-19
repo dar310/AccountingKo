@@ -19,11 +19,11 @@ import com.css152l_am5_g8.accountingko.R
 
 //Register functionality will be added later,
 class RegisterActivity : AppCompatActivity() {
-/*
-    private lateinit var registerViewModel: RegisterViewModel
+
+    //private lateinit var registerViewModel: RegisterViewModel
     private lateinit var binding: ActivityRegisterBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityRegisterBinding.inflate(layoutInflater)
