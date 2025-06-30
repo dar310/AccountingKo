@@ -35,6 +35,8 @@
             android:theme="@style/Theme.AccountingKo.NoActionBar">
 
         </activity>
+        <activity
+            android:name=".ui.dashboard.DashboardActivity" />
     </application>
 
 </manifest>
