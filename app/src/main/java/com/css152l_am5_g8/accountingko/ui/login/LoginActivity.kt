@@ -1,6 +1,8 @@
 package com.css152l_am5_g8.accountingko.ui.login
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -13,119 +15,142 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.Toast
 import com.css152l_am5_g8.accountingko.databinding.ActivityLoginBinding
-
 import com.css152l_am5_g8.accountingko.R
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.POST
+import retrofit2.Response
+import androidx.lifecycle.lifecycleScope
+import com.css152l_am5_g8.accountingko.MainActivity
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import android.util.Log
 
 //A template Functionality. this needs to connect to the database
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var loginViewModel: LoginViewModel
-    private lateinit var binding: ActivityLoginBinding
+    // Updated to match your server's expected field names
+    data class LoginRequest(val email: String, val password: String)  // Changed from username to email
+    data class LoginResponse(val success: Boolean, val token: String?, val message: String?)
+
+    // API Interface
+    interface ApiService {
+        @POST("api/login")  // This will become http://10.0.2.2:3000/api/login
+        suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+    }
+
+    // API Client with logging
+    private val loggingInterceptor = HttpLoggingInterceptor { message ->
+        Log.d("API", message)
+    }.apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .build()
+
+    private val apiService = Retrofit.Builder()
+        .baseUrl("http://10.0.2.2:3000/") // Base URL
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(ApiService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_login)
 
-        val username = binding.username
-        val password = binding.password
-        val login = binding.login
-        val loading = binding.loading
+        // Find your views
+        val usernameField = findViewById<android.widget.EditText>(R.id.username)
+        val passwordField = findViewById<android.widget.EditText>(R.id.password)
+        val loginButton = findViewById<android.widget.Button>(R.id.loginBtn)
 
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
+        loginButton.setOnClickListener {
+            val username = usernameField.text.toString().trim()
+            val password = passwordField.text.toString().trim()
 
-        loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
-            val loginState = it ?: return@Observer
-
-            // disable login button unless both username / password is valid
-            login.isEnabled = loginState.isDataValid
-
-            if (loginState.usernameError != null) {
-                username.error = getString(loginState.usernameError)
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-            if (loginState.passwordError != null) {
-                password.error = getString(loginState.passwordError)
-            }
-        })
 
-        loginViewModel.loginResult.observe(this@LoginActivity, Observer {
-            val loginResult = it ?: return@Observer
-
-            loading.visibility = View.GONE
-            if (loginResult.error != null) {
-                showLoginFailed(loginResult.error)
-            }
-            if (loginResult.success != null) {
-                updateUiWithUser(loginResult.success)
-            }
-            setResult(Activity.RESULT_OK)
-
-            //Complete and destroy login activity once successful
-            finish()
-        })
-
-        username.afterTextChanged {
-            loginViewModel.loginDataChanged(
-                username.text.toString(),
-                password.text.toString()
-            )
+            performLogin(username, password)
         }
+    }
 
-        password.apply {
-            afterTextChanged {
-                loginViewModel.loginDataChanged(
-                    username.text.toString(),
-                    password.text.toString()
-                )
-            }
+    private fun performLogin(username: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                // Show loading
+                Toast.makeText(this@LoginActivity, "Logging in...", Toast.LENGTH_SHORT).show()
 
-            setOnEditorActionListener { _, actionId, _ ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE ->
-                        loginViewModel.login(
-                            username.text.toString(),
-                            password.text.toString()
-                        )
+                // Log the request data for debugging
+                Log.d("Login", "Attempting login with email: $username")
+
+                // Make API call - using email field name
+                val response = apiService.login(LoginRequest(username, password))
+
+                Log.d("Login", "Response code: ${response.code()}")
+                Log.d("Login", "Response body: ${response.body()}")
+
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+
+                    if (loginResponse?.success == true) {
+                        // Login successful
+                        val token = loginResponse.token
+
+                        // Save token
+                        saveToken(token)
+
+                        // Show success message
+                        Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+
+                        // Navigate to main activity
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+                        // Login failed
+                        Toast.makeText(this@LoginActivity,
+                            loginResponse?.message ?: "Login failed",
+                            Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    // HTTP error - get error body for more details
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("Login", "HTTP Error ${response.code()}: $errorBody")
+
+                    Toast.makeText(this@LoginActivity,
+                        "Server error: ${response.code()} - Check your credentials",
+                        Toast.LENGTH_LONG).show()
                 }
-                false
-            }
 
-            login.setOnClickListener {
-                loading.visibility = View.VISIBLE
-                loginViewModel.login(username.text.toString(), password.text.toString())
+            } catch (e: Exception) {
+                // Network error
+                Log.e("Login", "Network error", e)
+                Toast.makeText(this@LoginActivity,
+                    "Network error: ${e.message}",
+                    Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome)
-        val displayName = model.displayName
-        // TODO : initiate successful logged in experience
-        Toast.makeText(
-            applicationContext,
-            "$welcome $displayName",
-            Toast.LENGTH_LONG
-        ).show()
-    }
-
-    private fun showLoginFailed(@StringRes errorString: Int) {
-        Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
-    }
-}
-
-/**
- * Extension function to simplify setting an afterTextChanged action to EditText components.
- */
-fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
-    this.addTextChangedListener(object : TextWatcher {
-        override fun afterTextChanged(editable: Editable?) {
-            afterTextChanged.invoke(editable.toString())
+    private fun saveToken(token: String?) {
+        if (token != null) {
+            val prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
+            prefs.edit().putString("token", token).apply()
         }
+    }
 
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-    })
+    // Helper function to get saved token
+    private fun getToken(): String? {
+        val prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
+        return prefs.getString("token", null)
+    }
 }
