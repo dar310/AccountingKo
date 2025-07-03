@@ -13,3 +13,11 @@ datasource db {
   provider = "postgresql"
   url      = env("postgresql://admin:admin@localhost:5432/AccountingKoDB")
 }
+
+model Invoice {
+  id          String   @id @default(uuid())
+  customer    String
+  amount      Float
+  status      String    // e.g., "paid", "pending", etc.
+  createdAt   DateTime @default(now())
+}
