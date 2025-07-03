@@ -314,7 +314,7 @@ class RegisterActivity : AppCompatActivity() {
 
         loginRedirectText.setOnClickListener {
             // Navigate to login activity
-            val intent = Intent(this, LoginActivity::class.java)
+            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }

@@ -175,6 +175,7 @@ import com.css152l_am5_g8.accountingko.MainActivity
 import com.css152l_am5_g8.accountingko.R
 import com.css152l_am5_g8.accountingko.api.ApiClient
 import com.css152l_am5_g8.accountingko.api.LoginRequest
+import com.css152l_am5_g8.accountingko.ui.dashboard.DashboardActivity
 import com.css152l_am5_g8.accountingko.ui.register.RegisterActivity
 import kotlinx.coroutines.launch
 
@@ -244,7 +245,7 @@ class LoginActivity : AppCompatActivity() {
                         Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
 
                         // Navigate to main activity
-                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
                         startActivity(intent)
                         finish()
 
