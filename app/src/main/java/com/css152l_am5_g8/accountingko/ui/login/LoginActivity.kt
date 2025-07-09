@@ -186,10 +186,10 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         // Find your views
-        val usernameField = findViewById<android.widget.EditText>(R.id.username)
-        val passwordField = findViewById<android.widget.EditText>(R.id.password)
-        val loginButton = findViewById<android.widget.Button>(R.id.loginBtn)
-        val registerButton = findViewById<android.widget.Button>(R.id.register_loginPage)
+        val usernameField = findViewById<android.widget.EditText>(R.id.emailInput)
+        val passwordField = findViewById<android.widget.EditText>(R.id.passwordInput)
+        val loginButton = findViewById<android.widget.Button>(R.id.loginButton)
+        val registerButton = findViewById<android.widget.Button>(R.id.registerButton)
 
         // Pre-fill email if passed from registration
         val prefilledEmail = intent.getStringExtra("email")

@@ -304,7 +304,7 @@ class RegisterActivity : AppCompatActivity() {
         passwordField = findViewById(R.id.password)
         confirmPasswordField = findViewById(R.id.confirm_password)
         registerButton = findViewById(R.id.register)
-        loginRedirectText = findViewById(R.id.loginRedirectText)
+        loginRedirectText = findViewById(R.id.registerRedirectText)
     }
 
     private fun setupClickListeners() {

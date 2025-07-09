@@ -5,7 +5,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="FFFFFF"
+    android:background="#FFFFFF"
     android:padding="24dp"
     tools:context=".ui.login.LoginActivity">
 
@@ -74,10 +74,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="475dp"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="32dp">
-            android:
+            android:padding="32dp"
+            tools:ignore="ExtraText">
+<!--            android:-->
 
             <!-- Welcome Text -->
             <TextView
@@ -155,6 +156,7 @@
                 android:layout_marginBottom="24dp"
                 android:clickable="true"
                 android:focusable="true"
+                android:minHeight="48dp"
                 android:padding="8dp"
                 android:text="Forgot Password?"
                 android:textColor="#8B4513"
@@ -242,12 +244,13 @@
         android:id="@+id/footerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="4dp"
         android:text="© 2025 AccountingKo. All rights reserved."
         android:textColor="#8B4513"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.477"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
