@@ -1,14 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:padding="24dp"
-    tools:context=".ui.register.RegisterActivity">
+    android:background="#F5F5F5">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Page Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Invoice"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Invoice Name -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Invoice Name"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Invoice Number -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Invoice No."
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- From Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="From"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginTop="16dp" />
+
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+
+        <!-- Client Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Client"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginTop="16dp" />
+
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+
+        <!-- Dates -->
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Date" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" android:layout_marginTop="20dp" />
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Due Date" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="12dp" />
+
+        <!-- Description -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@android:color/white"
+            android:hint="Item Name & Description"
+            android:padding="12dp" />
+
+        <!-- Quantity, Rate, Amount Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:layout_marginBottom="12dp">
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Quantity"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Rate"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:layout_marginStart="8dp"
+                android:inputType="numberDecimal" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Amount (₱)"
+                android:background="@android:color/white"
+                android:padding="12dp"
+                android:layout_marginStart="8dp"
+                android:inputType="numberDecimal"
+                android:enabled="false" />
+        </LinearLayout>
+
+        <!-- Subtotal -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Subtotal: ₱0.00"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="end"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Notes -->
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Notes"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:minLines="4"
+            android:textSize="16sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Create Button -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#2F1B14"
+            android:elevation="4dp"
+            android:padding="12dp"
+            android:text="Create Invoice"
+            android:textColor="#F5F5DC"
+            android:textStyle="bold"
+            app:rippleColor="#8B4513" />
+
+    </LinearLayout>
+</ScrollView>
