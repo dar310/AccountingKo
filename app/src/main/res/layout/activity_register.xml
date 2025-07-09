@@ -15,7 +15,7 @@
         android:id="@+id/appTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50ddp"
+        android:layout_marginTop="50dp"
         android:text="AccountingKo"
         android:textColor="#2F1B14"
         android:textSize="32sp"
