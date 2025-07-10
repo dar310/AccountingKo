@@ -23,6 +23,7 @@
 
         <!-- Invoice Name -->
         <EditText
+            android:id="@+id/cr_invoiceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Invoice Name"
@@ -33,6 +34,7 @@
 
         <!-- Invoice Number -->
         <EditText
+            android:id="@+id/cr_invoiceNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Invoice No."
@@ -50,8 +52,24 @@
             android:textColor="#333333"
             android:layout_marginTop="16dp" />
 
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText
+            android:id="@+id/cr_fromName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/cr_fromEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textEmailAddress" />
 
         <!-- Client Section -->
         <TextView
@@ -62,15 +80,52 @@
             android:textColor="#333333"
             android:layout_marginTop="16dp" />
 
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText
+            android:id="@+id/cr_clientName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/cr_clientEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textEmailAddress" />
 
         <!-- Dates -->
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Date" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" android:layout_marginTop="20dp" />
-        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Due Date" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="12dp" />
+        <EditText
+            android:id="@+id/cr_invoiceDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="20dp"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <EditText
+            android:id="@+id/cr_invoiceDueDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Due Date"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:focusable="false"
+            android:clickable="true" />
 
         <!-- Description -->
         <EditText
+            android:id="@+id/cr_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
@@ -87,6 +142,7 @@
             android:layout_marginBottom="12dp">
 
             <EditText
+                android:id="@+id/cr_quantity"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -96,6 +152,7 @@
                 android:inputType="numberDecimal" />
 
             <EditText
+                android:id="@+id/cr_rate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -106,6 +163,7 @@
                 android:inputType="numberDecimal" />
 
             <EditText
+                android:id="@+id/cr_amount"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -119,6 +177,7 @@
 
         <!-- Subtotal -->
         <TextView
+            android:id="@+id/cr_subtotal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Subtotal: ₱0.00"
@@ -130,6 +189,7 @@
 
         <!-- Notes -->
         <EditText
+            android:id="@+id/cr_invoiceNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Notes"
@@ -141,6 +201,7 @@
 
         <!-- Create Button -->
         <Button
+            android:id="@+id/createInvoiceBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#2F1B14"

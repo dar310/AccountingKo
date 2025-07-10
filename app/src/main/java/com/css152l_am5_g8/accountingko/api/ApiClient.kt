@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
     private const val BASE_URL = "http://10.0.2.2:3000/"
-
+    fun getBaseUrl(): String = BASE_URL
     // Logging interceptor for debugging
     private val loggingInterceptor = HttpLoggingInterceptor { message ->
         Log.d("API", message)

@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.css152l_am5_g8.accountingko.R
 import com.css152l_am5_g8.accountingko.api.ApiClient
 import com.css152l_am5_g8.accountingko.api.Invoice
+import com.css152l_am5_g8.accountingko.ui.invoice.CreateInvoiceActivity
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -342,8 +343,8 @@ class DashboardActivity : AppCompatActivity() {
         showToast("Navigate to Create Invoice")
 
         // Example navigation:
-        // val intent = Intent(this, CreateInvoiceActivity::class.java)
-        // startActivity(intent)
+        val intent = Intent(this, CreateInvoiceActivity::class.java)
+        startActivity(intent)
     }
 
     // ====================
