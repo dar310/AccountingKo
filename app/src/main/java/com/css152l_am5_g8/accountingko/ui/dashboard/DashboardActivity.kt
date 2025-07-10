@@ -200,7 +200,7 @@ class DashboardActivity : AppCompatActivity() {
 
 
     // ====================
-    // API CALLS
+    // API CALLS, GRAPH
     // ====================
 
     private suspend fun fetchInvoices() {
