@@ -289,7 +289,6 @@
 
                     <!-- Chart Placeholder -->
                     <FrameLayout
-                        android:id="@+id/chartContainer"
                         android:layout_width="match_parent"
                         android:layout_height="120dp"
                         android:background="#F8F9FA">
