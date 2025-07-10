@@ -81,12 +81,12 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun initializeMainDashboardViews() {
-        searchEditText = findViewById(R.id.et_search)
-        totalIncomeTextView = findViewById(R.id.tv_total_income)
-        totalExpensesTextView = findViewById(R.id.tv_total_expenses)
-        netProfitTextView = findViewById(R.id.tv_net_profit)
-        chartSpinner = findViewById(R.id.spinner_chart_period)
-        chartContainer = findViewById(R.id.chart_container)
+//        searchEditText = findViewById(R.id.et_search)
+//        totalIncomeTextView = findViewById(R.id.tv_total_income)
+//        totalExpensesTextView = findViewById(R.id.tv_total_expenses)
+//        netProfitTextView = findViewById(R.id.tv_net_profit)
+//        chartSpinner = findViewById(R.id.spinner_chart_period)
+//        chartContainer = findViewById(R.id.chart_container)
     }
 
     private fun setupNoInvoicesUI() {
