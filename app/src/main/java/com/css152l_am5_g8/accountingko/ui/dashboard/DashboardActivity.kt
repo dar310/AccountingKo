@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
 import com.css152l_am5_g8.accountingko.R
 import com.css152l_am5_g8.accountingko.api.ApiClient
@@ -15,22 +14,17 @@ import com.css152l_am5_g8.accountingko.api.Invoice
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 class DashboardActivity : AppCompatActivity() {
 
-    // UI Components
-    private lateinit var searchEditText: EditText
-    private lateinit var totalIncomeTextView: TextView
-    private lateinit var totalExpensesTextView: TextView
-    private lateinit var netProfitTextView: TextView
-    private lateinit var chartSpinner: Spinner
-    private lateinit var chartContainer: FrameLayout
-//    private lateinit var newInvoiceCard: CardView
-//    private lateinit var addExpenseCard: CardView
-//    private lateinit var viewAllTransactionsText: TextView
-//    private lateinit var viewAllInvoicesText: TextView
+    // UI Components for main dashboard
+    private var searchEditText: EditText? = null
+    private var totalIncomeTextView: TextView? = null
+    private var totalExpensesTextView: TextView? = null
+    private var netProfitTextView: TextView? = null
+    private var chartSpinner: Spinner? = null
+    private var chartContainer: FrameLayout? = null
 
     // Data
     private val invoices = mutableListOf<Invoice>()
@@ -41,85 +35,115 @@ class DashboardActivity : AppCompatActivity() {
     private val authManager by lazy { AuthManager(this) }
     private val currencyFormatter by lazy { NumberFormat.getCurrencyInstance(Locale("en", "PH")) }
 
+    // State tracking
+    private var currentLayoutType: LayoutType = LayoutType.MAIN_DASHBOARD
+
+    enum class LayoutType {
+        MAIN_DASHBOARD,
+        NO_INVOICES
+    }
+
     companion object {
         private const val TAG = "DashboardActivity"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.dashboard)
+        initializeApp()
+    }
 
-        setupUI()
+    override fun onResume() {
+        super.onResume()
+        refreshDashboardData()
+    }
+
+    // ====================
+    // INITIALIZATION
+    // ====================
+
+    private fun initializeApp() {
+        setContentView(R.layout.dashboard)
+        currentLayoutType = LayoutType.MAIN_DASHBOARD
+
+        setupMainDashboardUI()
         loadDashboardData()
     }
 
-    private fun setupUI() {
-        initializeViews()
-        setupEventListeners()
-        setupSpinner()
+    private fun setupMainDashboardUI() {
+        try {
+            initializeMainDashboardViews()
+            setupEventListeners()
+            setupSpinner()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting up main dashboard UI", e)
+            showError("Failed to initialize dashboard")
+        }
     }
 
-    private fun initializeViews() {
+    private fun initializeMainDashboardViews() {
         searchEditText = findViewById(R.id.et_search)
         totalIncomeTextView = findViewById(R.id.tv_total_income)
         totalExpensesTextView = findViewById(R.id.tv_total_expenses)
         netProfitTextView = findViewById(R.id.tv_net_profit)
         chartSpinner = findViewById(R.id.spinner_chart_period)
         chartContainer = findViewById(R.id.chart_container)
-//
-//        // Quick action cards — these must exist in dashboard.xml
-//        newInvoiceCard = findViewById(R.id.card_new_invoice)
-//        addExpenseCard = findViewById(R.id.card_add_expense)
-//
-//        // View all links — these must exist in dashboard.xml
-//        viewAllTransactionsText = findViewById(R.id.tv_view_all_transactions)
-//        viewAllInvoicesText = findViewById(R.id.tv_view_all_invoices)
     }
 
+    private fun setupNoInvoicesUI() {
+        val addInvoiceButton = findViewById<Button>(R.id.add_invoice_button)
+        addInvoiceButton?.setOnClickListener {
+            navigateToCreateInvoice()
+        }
+    }
 
     private fun setupEventListeners() {
-        // Search functionality
-        searchEditText.setOnEditorActionListener { _, _, _ ->
-            performSearch(searchEditText.text.toString())
+        searchEditText?.setOnEditorActionListener { _, _, _ ->
+            performSearch(searchEditText?.text.toString())
             true
         }
-
-        // Quick action cards
-//        newInvoiceCard.setOnClickListener {
-//            // TODO: Navigate to create invoice activity
-//            showToast("Create New Invoice")
-//        }
-//
-//        addExpenseCard.setOnClickListener {
-//            // TODO: Navigate to add expense activity
-//            showToast("Add New Expense")
-//        }
-//
-//        // View all links
-//        viewAllTransactionsText.setOnClickListener {
-//            // TODO: Navigate to transactions activity
-//            showToast("View All Transactions")
-//        }
-//
-//        viewAllInvoicesText.setOnClickListener {
-//            // TODO: Navigate to invoices activity
-//            showToast("View All Invoices")
-//        }
     }
 
     private fun setupSpinner() {
         val periods = arrayOf("This Month", "Last Month", "This Quarter", "This Year")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, periods)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        chartSpinner.adapter = adapter
+        chartSpinner?.adapter = adapter
 
-        chartSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        chartSpinner?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 updateChartData(periods[position])
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
+
+    // ====================
+    // LAYOUT MANAGEMENT
+    // ====================
+
+    private fun switchToNoInvoicesLayout() {
+        if (currentLayoutType == LayoutType.NO_INVOICES) return
+
+        setContentView(R.layout.dashboard_no_invoices)
+        currentLayoutType = LayoutType.NO_INVOICES
+        setupNoInvoicesUI()
+
+        Log.d(TAG, "Switched to no invoices layout")
+    }
+
+    private fun switchToMainDashboardLayout() {
+        if (currentLayoutType == LayoutType.MAIN_DASHBOARD) return
+
+        setContentView(R.layout.dashboard)
+        currentLayoutType = LayoutType.MAIN_DASHBOARD
+        setupMainDashboardUI()
+
+        Log.d(TAG, "Switched to main dashboard layout")
+    }
+
+    // ====================
+    // DATA LOADING
+    // ====================
 
     private fun loadDashboardData() {
         lifecycleScope.launch {
@@ -130,10 +154,14 @@ class DashboardActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Load all dashboard data concurrently
+                // Load invoices first to determine layout
                 fetchInvoices()
-                fetchTransactions()
-                fetchExpenses()
+
+                // Load other data only if we have invoices (main dashboard)
+                if (invoices.isNotEmpty()) {
+                    fetchTransactions()
+                    fetchExpenses()
+                }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading dashboard data", e)
@@ -141,6 +169,34 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun refreshDashboardData() {
+        lifecycleScope.launch {
+            try {
+                val token = authManager.getToken()
+                if (token == null) {
+                    handleAuthenticationError("Please login again")
+                    return@launch
+                }
+
+                // Clear existing data
+                invoices.clear()
+                transactions.clear()
+                expenses.clear()
+
+                // Reload data
+                loadDashboardData()
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error refreshing dashboard", e)
+                showError("Failed to refresh dashboard: ${e.message}")
+            }
+        }
+    }
+
+    // ====================
+    // API CALLS
+    // ====================
 
     private suspend fun fetchInvoices() {
         try {
@@ -167,7 +223,6 @@ class DashboardActivity : AppCompatActivity() {
         try {
             val token = authManager.getToken() ?: return
             // TODO: Implement API call for transactions
-            // For now, using mock data
             updateRecentTransactions()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching transactions", e)
@@ -178,66 +233,84 @@ class DashboardActivity : AppCompatActivity() {
         try {
             val token = authManager.getToken() ?: return
             // TODO: Implement API call for expenses
-            // For now, using mock data
             updateExpenseStats()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching expenses", e)
         }
     }
 
+    // ====================
+    // UI UPDATES
+    // ====================
+
     private fun updateInvoiceStats() {
+        // Check if we need to switch layouts
+        if (invoices.isEmpty()) {
+            switchToNoInvoicesLayout()
+            return
+        }
+
+        // Ensure we're on the main dashboard
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) {
+            switchToMainDashboardLayout()
+        }
+
+        // Update statistics
         val totalIncome = invoices
             .filter { it.status.lowercase() == "paid" }
             .sumOf { it.total }
 
-        totalIncomeTextView.text = currencyFormatter.format(totalIncome)
+        totalIncomeTextView?.text = currencyFormatter.format(totalIncome)
         updateNetProfit()
     }
 
     private fun updateExpenseStats() {
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
+
         // TODO: Calculate from actual expense data
         val totalExpenses = 85000.0 // Mock data
-        totalExpensesTextView.text = currencyFormatter.format(totalExpenses)
+        totalExpensesTextView?.text = currencyFormatter.format(totalExpenses)
         updateNetProfit()
     }
 
     private fun updateNetProfit() {
-        val incomeText = totalIncomeTextView.text.toString()
-        val expenseText = totalExpensesTextView.text.toString()
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
 
-        // Parse currency values (remove currency symbols and parse)
+        val incomeText = totalIncomeTextView?.text?.toString() ?: "0"
+        val expenseText = totalExpensesTextView?.text?.toString() ?: "0"
+
         val income = parseCurrencyValue(incomeText)
         val expenses = parseCurrencyValue(expenseText)
 
         val netProfit = income - expenses
-        netProfitTextView.text = currencyFormatter.format(netProfit)
-    }
-
-    private fun parseCurrencyValue(currencyText: String): Double {
-        return try {
-            currencyText.replace("[^\\d.]".toRegex(), "").toDouble()
-        } catch (e: Exception) {
-            0.0
-        }
+        netProfitTextView?.text = currencyFormatter.format(netProfit)
     }
 
     private fun updateRecentTransactions() {
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
+
         // TODO: Implement dynamic transaction cards
-        // For now, the XML has static transaction cards
         Log.d(TAG, "Recent transactions updated")
     }
 
     private fun updatePendingInvoices() {
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
+
         // TODO: Implement dynamic invoice cards
-        // For now, the XML has static invoice cards
         Log.d(TAG, "Pending invoices updated")
     }
 
     private fun updateChartData(period: String) {
+        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
+
         // TODO: Implement chart data update based on selected period
         Log.d(TAG, "Chart updated for period: $period")
         showToast("Chart updated for $period")
     }
+
+    // ====================
+    // USER ACTIONS
+    // ====================
 
     private fun performSearch(query: String) {
         if (query.isBlank()) {
@@ -250,7 +323,31 @@ class DashboardActivity : AppCompatActivity() {
         showToast("Searching for: $query")
     }
 
-    // Error Handling
+    private fun navigateToCreateInvoice() {
+        // TODO: Replace with actual CreateInvoiceActivity navigation
+        showToast("Navigate to Create Invoice")
+
+        // Example navigation:
+        // val intent = Intent(this, CreateInvoiceActivity::class.java)
+        // startActivity(intent)
+    }
+
+    // ====================
+    // UTILITY METHODS
+    // ====================
+
+    private fun parseCurrencyValue(currencyText: String): Double {
+        return try {
+            currencyText.replace("[^\\d.]".toRegex(), "").toDouble()
+        } catch (e: Exception) {
+            0.0
+        }
+    }
+
+    // ====================
+    // ERROR HANDLING
+    // ====================
+
     private fun handleAuthenticationError(message: String) {
         showError(message)
         authManager.clearToken()
@@ -292,12 +389,16 @@ class DashboardActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         super.onBackPressed()
     }
 }
 
-// Data classes for transactions and expenses
+// ====================
+// DATA CLASSES
+// ====================
+
 data class Transaction(
     val id: String,
     val description: String,
@@ -315,7 +416,10 @@ data class Expense(
     val date: String
 )
 
-// Separate Auth Manager for better organization
+// ====================
+// AUTH MANAGER
+// ====================
+
 class AuthManager(private val context: Context) {
     companion object {
         private const val PREFS_NAME = "auth"
