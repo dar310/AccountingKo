@@ -25,6 +25,10 @@ class DashboardActivity : AppCompatActivity() {
     private var netProfitTextView: TextView? = null
     private var chartSpinner: Spinner? = null
     private var chartContainer: FrameLayout? = null
+    private lateinit var totalRevenueTextView: TextView
+    private lateinit var totalInvoicesTextView: TextView
+    private lateinit var paidInvoicesTextView: TextView
+    private lateinit var pendingInvoicesTextView: TextView
 
     // Data
     private val invoices = mutableListOf<Invoice>()
@@ -81,12 +85,11 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun initializeMainDashboardViews() {
-//        searchEditText = findViewById(R.id.et_search)
-//        totalIncomeTextView = findViewById(R.id.tv_total_income)
-//        totalExpensesTextView = findViewById(R.id.tv_total_expenses)
-//        netProfitTextView = findViewById(R.id.tv_net_profit)
-//        chartSpinner = findViewById(R.id.spinner_chart_period)
-//        chartContainer = findViewById(R.id.chart_container)
+        totalRevenueTextView = findViewById(R.id.tv_total_revenue)
+        totalInvoicesTextView = findViewById(R.id.tv_total_invoices)
+        paidInvoicesTextView = findViewById(R.id.tv_paid_invoices)
+        pendingInvoicesTextView = findViewById(R.id.tv_pending_invoices)
+        chartContainer = findViewById(R.id.chartContainer)
     }
 
     private fun setupNoInvoicesUI() {
