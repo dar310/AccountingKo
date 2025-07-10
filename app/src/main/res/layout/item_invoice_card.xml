@@ -4,122 +4,284 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
-    android:foreground="?android:attr/selectableItemBackground">
+    app:cardElevation="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <!-- Invoice Name & Number -->
+        <!-- Main Content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_invoice_name"
-                android:layout_width="0dp"
+            <!-- Header Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Website Project"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#333333" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
 
-            <TextView
-                android:id="@+id/tv_invoice_number"
-                android:layout_width="wrap_content"
+                <!-- Status Indicator -->
+                <View
+                    android:id="@+id/status_indicator"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/circle_shape"
+                    android:backgroundTint="#4CAF50"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Invoice Name -->
+                <TextView
+                    android:id="@+id/tv_invoice_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Website Project"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Invoice Number -->
+                <TextView
+                    android:id="@+id/tv_invoice_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#INV-2025-012"
+                    android:textSize="14sp"
+                    android:textColor="#888888"
+                    android:background="@drawable/rounded_background"
+                    android:backgroundTint="#F5F5F5"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp" />
+            </LinearLayout>
+
+            <!-- Client Information -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="#INV-2025-012"
-                android:textSize="14sp"
-                android:textColor="#888888"
-                android:layout_gravity="bottom" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_business"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="2dp"
+                    android:contentDescription="Client icon" />
+
+                <TextView
+                    android:id="@+id/tv_client_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ABC Corporation Ltd."
+                    android:textSize="16sp"
+                    android:textColor="#555555"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- Info Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_background"
+                android:backgroundTint="#F8F9FA"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date"
+                        android:textSize="12sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jul 3, 2025"
+                        android:textSize="14sp"
+                        android:textColor="#555555" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Due Date"
+                        android:textSize="12sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_due_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jul 15, 2025"
+                        android:textSize="14sp"
+                        android:textColor="#555555" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="end">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status"
+                        android:textSize="12sp"
+                        android:textColor="#888888"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending"
+                        android:textSize="14sp"
+                        android:textColor="#FF9800"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Amount Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total Amount"
+                    android:textSize="14sp"
+                    android:textColor="#888888" />
+
+                <TextView
+                    android:id="@+id/tv_subtotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₱12,500.00"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#2E7D32" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Info Bar -->
+        <!-- Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:background="#EEEEEE"
-            android:padding="8dp"
-            android:weightSum="3">
+            android:background="#FAFAFA"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
 
-            <TextView
-                android:id="@+id/tv_from"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="From: ABC Corp"
-                android:textSize="14sp"
-                android:textColor="#555555" />
-
-            <TextView
-                android:id="@+id/tv_date"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Date: Jul 3"
-                android:textSize="14sp"
-                android:textColor="#555555"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tv_due_date"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Due: Jul 15"
-                android:textSize="14sp"
-                android:textColor="#555555"
-                android:gravity="end" />
-        </LinearLayout>
-
-        <!-- Subtotal -->
-        <TextView
-            android:id="@+id/tv_subtotal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="₱12,500.00"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#2E7D32"
-            android:layout_marginTop="12dp"
-            android:gravity="end" />
-
-        <!-- Edit/Delete Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp">
 
             <Button
                 android:id="@+id/btn_edit"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Edit"
-                android:textColor="#1976D2"
-                android:backgroundTint="#E3F2FD"
-                android:minHeight="36dp"
-                android:paddingHorizontal="12dp"
-                android:layout_marginEnd="8dp" />
+                android:textColor="#FF9800"
+                android:backgroundTint="#FFF3E0"
+                android:minHeight="40dp"
+                android:layout_marginHorizontal="4dp"
+                android:drawableStart="@drawable/ic_edit"
+                android:drawablePadding="8dp" />
 
             <Button
                 android:id="@+id/btn_delete"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Delete"
                 android:textColor="#D32F2F"
                 android:backgroundTint="#FFEBEE"
-                android:minHeight="36dp"
-                android:paddingHorizontal="12dp" />
+                android:minHeight="40dp"
+                android:layout_marginStart="8dp"
+                android:drawableStart="@drawable/ic_delete"
+                android:drawablePadding="8dp" />
+        </LinearLayout>
+
+        <!-- Expandable Options (initially hidden) -->
+        <LinearLayout
+            android:id="@+id/expandable_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#F5F5F5"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_duplicate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Duplicate"
+                    android:textColor="#6A1B9A"
+                    android:backgroundTint="#F3E5F5"
+                    android:minHeight="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:drawableStart="@drawable/ic_content_copy"
+                    android:drawablePadding="8dp" />
+
+                <Button
+                    android:id="@+id/btn_send"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Send"
+                    android:textColor="#00796B"
+                    android:backgroundTint="#E0F2F1"
+                    android:minHeight="36dp"
+                    android:layout_marginStart="8dp"
+                    android:drawableStart="@drawable/ic_send"
+                    android:drawablePadding="8dp" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
