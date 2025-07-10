@@ -90,7 +90,7 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupNoInvoicesUI() {
-        val addInvoiceButton = findViewById<Button>(R.id.add_invoice_button)
+        val addInvoiceButton = findViewById<Button>(R.id.btn_create_first_invoice)
         addInvoiceButton?.setOnClickListener {
             navigateToCreateInvoice()
         }
@@ -194,6 +194,8 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+
+
     // ====================
     // API CALLS
     // ====================
@@ -209,6 +211,15 @@ class DashboardActivity : AppCompatActivity() {
                     invoices.clear()
                     invoices.addAll(invoicesResponse.data ?: emptyList())
                     updateInvoiceStats()
+                    DashboardGraphHelper.loadDashboardGraphs(
+                        context = this,
+                        scope = lifecycleScope,
+                        authManager = authManager,
+                        chartContainer = chartContainer!!,
+                        totalIncomeView = totalIncomeTextView!!,
+                        totalExpensesView = totalExpensesTextView!!,
+                        netProfitView = netProfitTextView!!
+                    )
                     updatePendingInvoices()
                 }
             } else {
