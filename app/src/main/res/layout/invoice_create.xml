@@ -26,22 +26,24 @@
             android:id="@+id/cr_invoiceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Invoice Name"
+            android:layout_marginBottom="12dp"
             android:background="@android:color/white"
+            android:hint="Invoice Name"
+            android:minHeight="48dp"
             android:padding="12dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="12dp" />
+            android:textSize="16sp" />
 
         <!-- Invoice Number -->
         <EditText
             android:id="@+id/cr_invoiceNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Invoice No."
+            android:layout_marginBottom="12dp"
             android:background="@android:color/white"
+            android:hint="Invoice No."
+            android:minHeight="48dp"
             android:padding="12dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="12dp" />
+            android:textSize="16sp" />
 
         <!-- From Section -->
         <TextView
