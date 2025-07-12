@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA"
-    tools:context=".InvoiceActivity">
+    tools:context=".ui.invoice.CreateInvoiceActivity">
 
     <!-- App Bar Layout -->
     <com.google.android.material.appbar.AppBarLayout
@@ -159,10 +159,10 @@
                         android:id="@+id/tv_total_amount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$0.00"
+                        android:text="₱0.00"
+                        android:textColor="#388E3C"
                         android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="#388E3C" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -206,7 +206,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:listitem="@layout/item_invoice" />
+                    tools:listitem="@layout/item_invoice_card" />
 
                 <!-- Empty State -->
                 <LinearLayout
