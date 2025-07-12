@@ -155,7 +155,7 @@ class CreateInvoiceActivity : AppCompatActivity() {
 
     private fun showDueDateDialog() {
         val options = arrayOf("Due on Receipt", "15 days", "30 days")
-        val values = arrayOf(1, 15, 30)
+        val values = arrayOf(0, 15, 30)
         AlertDialog.Builder(this)
             .setTitle("Select Due Date")
             .setItems(options) { _, i ->
