@@ -218,7 +218,6 @@ class DashboardActivity : AppCompatActivity() {
                     DashboardGraphHelper.loadDashboardGraphs(
                         context = this,
                         scope = lifecycleScope,
-                        authManager = authManager,
                         chartContainer = chartContainer!!,
                         totalIncomeView = totalIncomeTextView!!,
                         totalExpensesView = totalExpensesTextView!!,
