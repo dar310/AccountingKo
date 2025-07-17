@@ -72,6 +72,15 @@
             android:padding="12dp"
             android:layout_marginBottom="8dp"
             android:inputType="textEmailAddress" />
+        <EditText
+            android:id="@+id/cr_fromAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textLongMessage"/>
 
         <!-- Client Section -->
         <TextView
@@ -100,6 +109,15 @@
             android:padding="12dp"
             android:layout_marginBottom="8dp"
             android:inputType="textEmailAddress" />
+        <EditText
+            android:id="@+id/cr_clientAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textLongMessage"/>
 
         <!-- Dates -->
         <EditText

@@ -13,6 +13,9 @@ import com.css152l_am5_g8.accountingko.api.ApiClient
 import com.css152l_am5_g8.accountingko.api.Invoice
 import com.css152l_am5_g8.accountingko.ui.invoice.CreateInvoiceActivity
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
+import com.css152l_am5_g8.accountingko.api.AuthManager
+import com.css152l_am5_g8.accountingko.ui.invoice.InvoiceListActivity
+import com.css152l_am5_g8.accountingko.ui.register.RegisterActivity
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
@@ -30,6 +33,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var totalInvoicesTextView: TextView
     private lateinit var paidInvoicesTextView: TextView
     private lateinit var pendingInvoicesTextView: TextView
+    private lateinit var btnInvoices: Button
 
     // Data
     private val invoices = mutableListOf<Invoice>()
@@ -91,6 +95,7 @@ class DashboardActivity : AppCompatActivity() {
         paidInvoicesTextView = findViewById(R.id.tv_paid_invoices)
         pendingInvoicesTextView = findViewById(R.id.tv_pending_invoices)
         chartContainer = findViewById(R.id.chartContainer)
+        btnInvoices = findViewById(R.id.btn_invoices)
     }
 
     private fun setupNoInvoicesUI() {
@@ -101,9 +106,13 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupEventListeners() {
-        searchEditText?.setOnEditorActionListener { _, _, _ ->
-            performSearch(searchEditText?.text.toString())
-            true
+//        searchEditText?.setOnEditorActionListener { _, _, _ ->
+//            performSearch(searchEditText?.text.toString())
+//            true
+//        }
+        btnInvoices.setOnClickListener {
+            val listIntent = Intent(this@DashboardActivity, InvoiceListActivity::class.java)
+            startActivity(listIntent)
         }
     }
 
@@ -433,22 +442,3 @@ data class Expense(
 // ====================
 // AUTH MANAGER
 // ====================
-
-class AuthManager(private val context: Context) {
-    companion object {
-        private const val PREFS_NAME = "auth"
-        private const val TOKEN_KEY = "token"
-    }
-
-    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    fun getToken(): String? = prefs.getString(TOKEN_KEY, null)
-
-    fun clearToken() {
-        prefs.edit().remove(TOKEN_KEY).apply()
-    }
-
-    fun saveToken(token: String) {
-        prefs.edit().putString(TOKEN_KEY, token).apply()
-    }
-}

@@ -44,7 +44,7 @@ object DashboardGraphHelper {
                     // --- CALCULATE TOTALS ---
                     val totalIncome = pendingInvoices.sumOf { it.total }
                     val totalExpenses = 85000.0 // placeholder
-                    val netProfit = totalIncome - totalExpenses
+                    val netProfit = totalIncome - totalExpenses.toString().toBigDecimal()
 
                     val formatter = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
                     totalIncomeView.text = formatter.format(totalIncome)

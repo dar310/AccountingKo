@@ -6,6 +6,9 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import com.google.gson.annotations.SerializedName
+import retrofit2.http.DELETE
+import retrofit2.http.Path
+import java.math.BigDecimal
 
 // Data classes for requests and responses
 data class LoginRequest(val email: String, val password: String)
@@ -23,6 +26,12 @@ data class RegisterResponse(
     val user: User?
 )
 
+data class DeleteInvoiceResponse(
+    val success: Boolean,
+    val message: String?
+)
+
+
 data class User(
     val id: Int,
     val name: String,
@@ -37,7 +46,7 @@ data class Invoice(
     val invoiceName: String,
 
     @SerializedName("total")
-    val total: Double,
+    val total: BigDecimal,
 
     @SerializedName("status")
     val status: String,
@@ -82,7 +91,7 @@ data class Invoice(
     val invoiceItemQuantity: Int,
 
     @SerializedName("invoiceItemRate")
-    val invoiceItemRate: Double,
+    val invoiceItemRate: BigDecimal,
 
     @SerializedName("createdAt")
     val createdAt: String,
@@ -159,4 +168,9 @@ interface ApiService {
 
     @GET("api/invoices")
     suspend fun getInvoices(@Header("Authorization") token: String): Response<InvoicesResponse>
+    @DELETE("api/invoices/{id}")
+    suspend fun deleteInvoice(
+        @Header("Authorization") token: String,
+        @Path("id") invoiceId: String
+    ): Response<DeleteInvoiceResponse>
 }

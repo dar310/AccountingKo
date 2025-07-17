@@ -1,7 +1,6 @@
 package com.css152l_am5_g8.accountingko.ui.invoice
 import android.app.AlertDialog
 import android.app.DatePickerDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -11,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.css152l_am5_g8.accountingko.api.ApiClient
 import com.css152l_am5_g8.accountingko.R
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
+import com.css152l_am5_g8.accountingko.api.AuthManager
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import okhttp3.*
@@ -39,8 +39,10 @@ class CreateInvoiceActivity : AppCompatActivity() {
     private lateinit var invoiceNumber: EditText
     private lateinit var fromName: EditText
     private lateinit var fromEmail: EditText
+    private lateinit var fromAddress: EditText
     private lateinit var clientName: EditText
     private lateinit var clientEmail: EditText
+    private lateinit var clientAddress: EditText
     private lateinit var invoiceDate: EditText
     private lateinit var dueDate: EditText
     private lateinit var description: EditText
@@ -88,8 +90,10 @@ class CreateInvoiceActivity : AppCompatActivity() {
         invoiceNumber = findViewById(R.id.cr_invoiceNumber)
         fromName = findViewById(R.id.cr_fromName)
         fromEmail = findViewById(R.id.cr_fromEmail)
+        fromAddress = findViewById(R.id.cr_fromAddress)
         clientName = findViewById(R.id.cr_clientName)
         clientEmail = findViewById(R.id.cr_clientEmail)
+        clientAddress = findViewById(R.id.cr_clientAddress)
         invoiceDate = findViewById(R.id.cr_invoiceDate)
         dueDate = findViewById(R.id.cr_invoiceDueDate)
         description = findViewById(R.id.cr_description)
@@ -171,8 +175,10 @@ class CreateInvoiceActivity : AppCompatActivity() {
             invoiceNumber to "Invoice Number",
             fromName to "From Name",
             fromEmail to "From Email",
+            fromAddress to "From Address",
             clientName to "Client Name",
             clientEmail to "Client Email",
+            clientAddress to "Client Address",
             invoiceDate to "Date",
             description to "Description",
             quantity to "Quantity",
@@ -212,22 +218,22 @@ class CreateInvoiceActivity : AppCompatActivity() {
 
         val invoice = InvoiceRequest(
             invoiceName = invoiceName.text.toString().trim(),
-            total = (quantity.text.toString().toDouble() * rate.text.toString().toDouble()).toInt(),
+            total = (quantity.text.toString().toBigDecimal() * rate.text.toString().toBigDecimal()),
             status = "PENDING",
             date = isoDateFormat.format(selectedDate ?: Date()),
             dueDate = selectedDueDate,
             fromName = fromName.text.toString().trim(),
             fromEmail = fromEmail.text.toString().trim(),
-            fromAddress = "",
+            fromAddress = fromAddress.text.toString().trim(),
             clientName = clientName.text.toString().trim(),
             clientEmail = clientEmail.text.toString().trim(),
-            clientAddress = "",
+            clientAddress = clientAddress.text.toString().trim(),
             currency = "PHP",
             invoiceNumber = invoiceNumber.text.toString().toInt(),
             note = note.text.toString().trim().takeIf { it.isNotEmpty() },
             invoiceItemDescription = description.text.toString().trim(),
             invoiceItemQuantity = quantity.text.toString().toInt(),
-            invoiceItemRate = rate.text.toString().toInt()
+            invoiceItemRate = rate.text.toString().toBigDecimal()
         )
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -296,21 +302,3 @@ class CreateInvoiceActivity : AppCompatActivity() {
 }
 
 // AuthManager class (same as in DashboardActivity)
-class AuthManager(private val context: Context) {
-    companion object {
-        private const val PREFS_NAME = "auth"
-        private const val TOKEN_KEY = "token"
-    }
-
-    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    fun getToken(): String? = prefs.getString(TOKEN_KEY, null)
-
-    fun clearToken() {
-        prefs.edit().remove(TOKEN_KEY).apply()
-    }
-
-    fun saveToken(token: String) {
-        prefs.edit().putString(TOKEN_KEY, token).apply()
-    }
-}

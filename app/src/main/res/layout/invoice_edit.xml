@@ -56,6 +56,15 @@
 
         <EditText android:id="@+id/et_from_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
         <EditText android:id="@+id/et_from_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText
+            android:id="@+id/et_fromAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textLongMessage"/>
 
         <!-- Client Section -->
         <TextView
@@ -68,6 +77,15 @@
 
         <EditText android:id="@+id/et_client_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Name" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
         <EditText android:id="@+id/et_client_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" />
+        <EditText
+            android:id="@+id/et_clientAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:inputType="textLongMessage"/>
 
         <!-- Dates -->
         <EditText android:id="@+id/et_invoice_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Date" android:background="@android:color/white" android:padding="12dp" android:layout_marginBottom="8dp" android:layout_marginTop="20dp" />
