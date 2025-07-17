@@ -147,7 +147,14 @@ class EditInvoiceActivity : AppCompatActivity(){
         selectedDate = dateFormat.parse(invoiceRequest.date)
         selectedDueDays = invoiceRequest.dueDate
         etInvoiceDate.setText(invoiceRequest.date.take(10))
-        etDueDate.setText("$selectedDueDays days")
+        val options = arrayOf("Due on Receipt", "15 days", "30 days")
+        val values = arrayOf(0, 15, 30)
+        val index = values.indexOf(invoiceRequest.dueDate)
+        if (index != -1) {
+            etDueDate.setText(options[index])
+        } else {
+            etDueDate.setText("${invoiceRequest.dueDate} days") // fallback
+        }
         etDescription.setText(invoiceRequest.invoiceItemDescription)
         etQuantity.setText(invoiceRequest.invoiceItemQuantity.toString())
         etRate.setText(invoiceRequest.invoiceItemRate.toPlainString())

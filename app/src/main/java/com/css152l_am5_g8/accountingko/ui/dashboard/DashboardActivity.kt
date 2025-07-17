@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.css152l_am5_g8.accountingko.R
 import com.css152l_am5_g8.accountingko.api.ApiClient
+import com.css152l_am5_g8.accountingko.api.ApiClient.apiService
 import com.css152l_am5_g8.accountingko.api.Invoice
 import com.css152l_am5_g8.accountingko.ui.invoice.CreateInvoiceActivity
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
@@ -17,6 +18,7 @@ import com.css152l_am5_g8.accountingko.api.AuthManager
 import com.css152l_am5_g8.accountingko.ui.invoice.InvoiceListActivity
 import com.css152l_am5_g8.accountingko.ui.register.RegisterActivity
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.*
 
@@ -34,7 +36,6 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var paidInvoicesTextView: TextView
     private lateinit var pendingInvoicesTextView: TextView
     private lateinit var btnInvoices: Button
-
     // Data
     private val invoices = mutableListOf<Invoice>()
     private val transactions = mutableListOf<Transaction>()
@@ -172,6 +173,7 @@ class DashboardActivity : AppCompatActivity() {
 
                 // Load other data only if we have invoices (main dashboard)
                 if (invoices.isNotEmpty()) {
+                    totalRevenue()
                     fetchTransactions()
                     fetchExpenses()
                 }
@@ -241,7 +243,15 @@ class DashboardActivity : AppCompatActivity() {
             Log.e(TAG, "Error fetching invoices", e)
         }
     }
-
+    private suspend fun getTotalSumOfInvoices(token: String): BigDecimal {
+        val response = apiService.getInvoices("Bearer $token")
+        if (response.isSuccessful) {
+            val invoices = response.body()?.data ?: emptyList()
+            return invoices.fold(BigDecimal.ZERO) { acc, invoice -> acc + invoice.total }
+        } else {
+            throw Exception("Failed to fetch invoices: ${response.code()}")
+        }
+    }
     private suspend fun fetchTransactions() {
         try {
             val token = authManager.getToken() ?: return
@@ -251,7 +261,11 @@ class DashboardActivity : AppCompatActivity() {
             Log.e(TAG, "Error fetching transactions", e)
         }
     }
-
+    private suspend fun totalRevenue(){
+        val token = authManager.getToken()?: return
+        val totalRevenue = getTotalSumOfInvoices(token)
+        totalRevenueTextView?.text = currencyFormatter.format(totalRevenue)
+    }
     private suspend fun fetchExpenses() {
         try {
             val token = authManager.getToken() ?: return
