@@ -10,7 +10,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Manage Entry</string>
     <string name="menu_slideshow">Other option (placeholder)</string>
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_login">AccountingKo</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
