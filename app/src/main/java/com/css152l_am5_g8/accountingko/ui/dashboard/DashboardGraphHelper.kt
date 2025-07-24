@@ -8,109 +8,240 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.css152l_am5_g8.accountingko.api.ApiClient
-import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 object DashboardGraphHelper {
 
+    private const val TAG = "DashboardGraphHelper"
+
     fun loadDashboardGraphs(
         context: Context,
         scope: LifecycleCoroutineScope,
-        chartContainer: FrameLayout,
-        totalIncomeView: TextView,
-        totalExpensesView: TextView,
-        netProfitView: TextView
+        chartContainer: FrameLayout
     ) {
         val authManager = AuthManager(context)
 
         scope.launch {
             try {
-                val token = authManager.getToken() ?: return@launch
+                val token = authManager.getToken()
+                if (token == null) {
+                    Log.e(TAG, "No authentication token found")
+                    showNoDataMessage(chartContainer)
+                    return@launch
+                }
+
+                Log.d(TAG, "Fetching invoices for paid invoices chart")
                 val response = ApiClient.apiService.getInvoices("Bearer $token")
 
                 if (response.isSuccessful) {
-                    val invoices = response.body()?.data ?: emptyList()
+                    val invoicesResponse = response.body()
+                    if (invoicesResponse?.success == true) {
+                        val allInvoices = invoicesResponse.data ?: emptyList()
+                        Log.d(TAG, "Fetched ${allInvoices.size} total invoices")
 
-                    // --- FILTER FOR PENDING ONLY ---
-                    val pendingInvoices = invoices.filter { it.status.equals("pending", ignoreCase = true) }
+                        // Filter for PAID invoices in the last 30 days
+                        val thirtyDaysAgo = Calendar.getInstance().apply {
+                            add(Calendar.DAY_OF_YEAR, -30)
+                        }.time
 
-                    // --- CALCULATE TOTALS ---
-                    val totalIncome = pendingInvoices.sumOf { it.total }
-                    val totalExpenses = 85000.0 // placeholder
-                    val netProfit = totalIncome - totalExpenses.toString().toBigDecimal()
+                        val paidInvoicesLast30Days = allInvoices.filter { invoice ->
+                            val isPaid = invoice.status.equals("paid", ignoreCase = true)
+                            val invoiceDate = parseInvoiceDate(invoice.createdAt)
+                            val isWithinLast30Days = invoiceDate?.after(thirtyDaysAgo) == true
 
-                    val formatter = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
-                    totalIncomeView.text = formatter.format(totalIncome)
-                    totalExpensesView.text = formatter.format(totalExpenses)
-                    netProfitView.text = formatter.format(netProfit)
+                            isPaid && isWithinLast30Days
+                        }
 
-                    // --- SHOW CHART ---
-                    chartContainer.visibility = View.VISIBLE
-                    chartContainer.removeAllViews()
+                        Log.d(TAG, "Found ${paidInvoicesLast30Days.size} paid invoices in last 30 days")
 
-                    val barChart = BarChart(context)
-                    chartContainer.addView(barChart)
+                        // Clear container and show chart
+                        chartContainer.visibility = View.VISIBLE
+                        chartContainer.removeAllViews()
 
-                    val grouped = pendingInvoices.groupBy {
-                        it.createdAt.take(7) // "YYYY-MM"
+                        if (paidInvoicesLast30Days.isNotEmpty()) {
+                            val lineChart = LineChart(context)
+                            chartContainer.addView(lineChart)
+
+                            // Group by date and sum amounts
+                            val dailyTotals = paidInvoicesLast30Days.groupBy { invoice ->
+                                extractDateString(invoice.createdAt)
+                            }.mapValues { (_, invoices) ->
+                                invoices.sumOf { it.total.toDouble() }
+                            }
+
+                            // Create 30-day timeline
+                            val timeline = generateLast30DaysTimeline()
+                            val chartData = timeline.map { date ->
+                                val amount = dailyTotals[date] ?: 0.0
+                                Pair(date, amount.toFloat())
+                            }
+
+                            setupLineChart(lineChart, chartData)
+                            Log.d(TAG, "Paid invoices chart setup completed")
+                        } else {
+                            showNoDataMessage(chartContainer, "No paid invoices in the last 30 days")
+                        }
+                    } else {
+                        Log.e(TAG, "API response unsuccessful")
+                        showNoDataMessage(chartContainer, "Failed to load data")
                     }
-
-                    val labels = grouped.keys.sorted()
-                    val values = labels.map { label ->
-                        grouped[label]?.sumOf { it.total.toDouble() }?.toFloat() ?: 0f
-                    }
-
-                    setupBarChart(barChart, labels, values)
-
-                    Log.d("DashboardGraphHelper", "Graphs and values loaded successfully")
-
                 } else {
-                    Log.e("DashboardGraphHelper", "Failed to fetch invoices: ${response.code()}")
+                    Log.e(TAG, "HTTP Error: ${response.code()}")
+                    showNoDataMessage(chartContainer, "Server error")
                 }
             } catch (e: Exception) {
-                Log.e("DashboardGraphHelper", "Error loading graph data", e)
+                Log.e(TAG, "Error loading paid invoices chart", e)
+                showNoDataMessage(chartContainer, "Error loading chart")
             }
         }
     }
 
-    private fun setupBarChart(barChart: BarChart, labels: List<String>, values: List<Float>) {
-        val entries = values.mapIndexed { index, value -> BarEntry(index.toFloat(), value) }
-        val dataSet = BarDataSet(entries, "Pending Invoices")
-        dataSet.color = Color.parseColor("#FFA726") // Orange for pending
+    private fun parseInvoiceDate(dateString: String): Date? {
+        return try {
+            val formats = listOf(
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd"
+            )
 
-        val barData = BarData(dataSet)
-        barData.barWidth = 0.9f
-
-        barChart.data = barData
-        barChart.setFitBars(true)
-        barChart.description.isEnabled = false
-        barChart.setScaleEnabled(false)
-        barChart.setDrawGridBackground(false)
-
-        val xAxis = barChart.xAxis
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
-                return labels.getOrElse(value.toInt()) { "" }
+            for (format in formats) {
+                try {
+                    val sdf = SimpleDateFormat(format, Locale.getDefault())
+                    return sdf.parse(dateString)
+                } catch (e: Exception) {
+                    continue
+                }
             }
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing date: $dateString", e)
+            null
         }
-        xAxis.granularity = 1f
-        xAxis.setDrawGridLines(false)
-
-        barChart.axisLeft.setDrawGridLines(false)
-        barChart.axisRight.isEnabled = false
-
-        barChart.invalidate()
     }
 
-    // Local copy of AuthManager
+    private fun extractDateString(dateString: String): String {
+        return try {
+            val date = parseInvoiceDate(dateString)
+            if (date != null) {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                sdf.format(date)
+            } else {
+                dateString.take(10)
+            }
+        } catch (e: Exception) {
+            dateString.take(10)
+        }
+    }
+
+    private fun generateLast30DaysTimeline(): List<String> {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        val timeline = mutableListOf<String>()
+
+        for (i in 29 downTo 0) {
+            calendar.time = Date()
+            calendar.add(Calendar.DAY_OF_YEAR, -i)
+            timeline.add(dateFormat.format(calendar.time))
+        }
+
+        return timeline
+    }
+
+    private fun setupLineChart(lineChart: LineChart, chartData: List<Pair<String, Float>>) {
+        val entries = chartData.mapIndexed { index, (_, value) ->
+            Entry(index.toFloat(), value)
+        }
+
+        val dataSet = LineDataSet(entries, "Paid Invoices")
+        dataSet.apply {
+            color = Color.parseColor("#4CAF50")
+            setCircleColor(Color.parseColor("#4CAF50"))
+            lineWidth = 2f
+            circleRadius = 3f
+            setDrawCircleHole(false)
+            setDrawFilled(true)
+            fillColor = Color.parseColor("#E8F5E8")
+            fillAlpha = 60
+            setDrawValues(false)
+        }
+
+        val lineData = LineData(dataSet)
+        lineChart.data = lineData
+
+        lineChart.apply {
+            description.isEnabled = false
+            setTouchEnabled(true)
+            isDragEnabled = true
+            setScaleEnabled(false)
+            setDrawGridBackground(false)
+            setPinchZoom(false)
+
+            axisRight.isEnabled = false
+
+            axisLeft.apply {
+                setDrawGridLines(true)
+                gridColor = Color.parseColor("#E0E0E0")
+                textColor = Color.parseColor("#666666")
+                textSize = 9f
+            }
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false)
+                textColor = Color.parseColor("#666666")
+                textSize = 8f
+                granularity = 1f
+                labelRotationAngle = -45f
+                setLabelCount(6, false)
+
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        val index = value.toInt()
+                        return if (index >= 0 && index < chartData.size) {
+                            val date = chartData[index].first
+                            try {
+                                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                val outputFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+                                val parsedDate = inputFormat.parse(date)
+                                outputFormat.format(parsedDate ?: Date())
+                            } catch (e: Exception) {
+                                date.substring(5)
+                            }
+                        } else ""
+                    }
+                }
+            }
+
+            legend.isEnabled = false
+        }
+
+        lineChart.invalidate()
+    }
+
+    private fun showNoDataMessage(chartContainer: FrameLayout, message: String = "No chart data available.") {
+        chartContainer.removeAllViews()
+
+        val textView = TextView(chartContainer.context).apply {
+            text = message
+            textSize = 12f
+            setTextColor(Color.parseColor("#999999"))
+            gravity = android.view.Gravity.CENTER
+            setPadding(16, 16, 16, 16)
+        }
+
+        chartContainer.addView(textView)
+        chartContainer.visibility = View.VISIBLE
+    }
+
     class AuthManager(private val context: Context) {
         companion object {
             private const val PREFS_NAME = "auth"

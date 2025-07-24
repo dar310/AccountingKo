@@ -14,7 +14,8 @@ import java.util.Locale
 class InvoiceAdapter (
     private var invoices: List<InvoiceRequest>,
     private val onEditClick: (InvoiceRequest) -> Unit,
-    private val onDeleteClick: (InvoiceRequest) -> Unit
+    private val onDeleteClick: (InvoiceRequest) -> Unit,
+    private val onMarkPaidClick: (InvoiceRequest) -> Unit
     ) : RecyclerView.Adapter<InvoiceAdapter.InvoiceViewHolder>() {
 
         fun updateData(newInvoices: List<InvoiceRequest>) {
@@ -64,6 +65,7 @@ class InvoiceAdapter (
 
             holder.btnEdit.setOnClickListener { onEditClick(invoice) }
             holder.btnDelete.setOnClickListener { onDeleteClick(invoice) }
+            holder.btnMarkAsPaid.setOnClickListener { onMarkPaidClick(invoice) }
         }
 
         override fun getItemCount(): Int = invoices.size
@@ -78,5 +80,6 @@ class InvoiceAdapter (
             val tvSubtotal: TextView = itemView.findViewById(R.id.tv_subtotal)
             val btnEdit: Button = itemView.findViewById(R.id.btn_edit)
             val btnDelete: Button = itemView.findViewById(R.id.btn_delete)
+            val btnMarkAsPaid: Button = itemView.findViewById(R.id.btn_mark_paid)
         }
     }

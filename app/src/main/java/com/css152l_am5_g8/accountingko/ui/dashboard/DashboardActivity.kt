@@ -175,7 +175,7 @@ class DashboardActivity : AppCompatActivity() {
                 if (invoices.isNotEmpty()) {
                     totalRevenue()
                     fetchTransactions()
-                    fetchExpenses()
+//                    fetchExpenses()
                 }
 
             } catch (e: Exception) {
@@ -225,22 +225,38 @@ class DashboardActivity : AppCompatActivity() {
                 if (invoicesResponse?.success == true) {
                     invoices.clear()
                     invoices.addAll(invoicesResponse.data ?: emptyList())
+
+                    Log.d(TAG, "Fetched ${invoices.size} invoices")
+
+                    // Update basic stats
                     updateInvoiceStats()
-                    DashboardGraphHelper.loadDashboardGraphs(
-                        context = this,
-                        scope = lifecycleScope,
-                        chartContainer = chartContainer!!,
-                        totalIncomeView = totalIncomeTextView!!,
-                        totalExpensesView = totalExpensesTextView!!,
-                        netProfitView = netProfitTextView!!
-                    )
-                    updatePendingInvoices()
+
+                    // Load ONLY the paid invoices chart - safely
+                    try {
+                        chartContainer?.let { container ->
+                            DashboardGraphHelper.loadDashboardGraphs(
+                                context = this@DashboardActivity,
+                                scope = lifecycleScope,
+                                chartContainer = container
+                            )
+                        } ?: Log.e(TAG, "Chart container is null")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error loading chart", e)
+                        // Don't show error to user, just log it
+                    }
+
+                    // Update total revenue
+                    totalRevenue()
+
+                } else {
+                    Log.e(TAG, "API response unsuccessful")
                 }
             } else {
                 handleHttpError(response.code(), response.errorBody()?.string())
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching invoices", e)
+            showError("Failed to fetch invoices")
         }
     }
     private suspend fun getTotalSumOfInvoices(token: String): BigDecimal {
@@ -281,24 +297,29 @@ class DashboardActivity : AppCompatActivity() {
     // ====================
 
     private fun updateInvoiceStats() {
-        // Check if we need to switch layouts
         if (invoices.isEmpty()) {
             switchToNoInvoicesLayout()
             return
         }
 
-        // Ensure we're on the main dashboard
         if (currentLayoutType != LayoutType.MAIN_DASHBOARD) {
             switchToMainDashboardLayout()
         }
 
-        // Update statistics
-        val totalIncome = invoices
-            .filter { it.status.lowercase() == "paid" }
-            .sumOf { it.total }
+        // Safely update UI elements
+        try {
+            totalInvoicesTextView.text = invoices.size.toString()
 
-        totalIncomeTextView?.text = currencyFormatter.format(totalIncome)
-        updateNetProfit()
+            val paidInvoices = invoices.filter { it.status.lowercase() == "paid" }
+            paidInvoicesTextView.text = paidInvoices.size.toString()
+
+            val pendingInvoices = invoices.filter { it.status.lowercase() == "pending" }
+            pendingInvoicesTextView.text = pendingInvoices.size.toString()
+
+            Log.d(TAG, "Stats updated - Total: ${invoices.size}, Paid: ${paidInvoices.size}, Pending: ${pendingInvoices.size}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating invoice stats", e)
+        }
     }
 
     private fun updateExpenseStats() {

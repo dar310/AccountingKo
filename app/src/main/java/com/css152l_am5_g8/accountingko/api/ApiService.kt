@@ -7,6 +7,8 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.DELETE
+import retrofit2.http.PATCH
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.math.BigDecimal
 
@@ -30,6 +32,13 @@ data class DeleteInvoiceResponse(
     val success: Boolean,
     val message: String?
 )
+
+data class BasicResponse(
+    val success: Boolean,
+    val message: String?
+)
+
+
 
 
 data class User(
@@ -123,6 +132,12 @@ data class InvoiceUser(
     val lastName: String?
 )
 
+
+data class StatusUpdateRequest(
+    @SerializedName("status")
+    val status: String  // Only field needed
+)
+
 // Fixed response structure to match actual API response
 data class InvoicesResponse(
     @SerializedName("success")
@@ -173,4 +188,10 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("id") invoiceId: String
     ): Response<DeleteInvoiceResponse>
+    @PATCH("api/invoices/{id}")
+    suspend fun updateInvoiceStatus(
+        @Header("Authorization") token: String,
+        @Path("id") invoiceId: String,
+        @Body request: StatusUpdateRequest
+    ): Response<BasicResponse>
 }

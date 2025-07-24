@@ -35,7 +35,7 @@ object ApiClient {
                     fetchGistContent("https://gist.githubusercontent.com/dar310/436aa20c117b11489fee3aa9781f0fc6/raw/tunnel_url.txt")
                 } catch (e: Exception) {
                     Log.e("ApiClient", "Failed to fetch BASE_URL: ${e.message}")
-                    "https://10.0.2.2:3000" // fallback
+                    "http://10.0.2.2:3000" // fallback
                 }
             }
         }

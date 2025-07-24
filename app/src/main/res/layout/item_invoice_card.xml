@@ -212,6 +212,18 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp">
 
+            <Button
+                android:id="@+id/btn_mark_paid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Mark Paid"
+                android:textColor="#2E7D32"
+                android:backgroundTint="#E8F5E8"
+                android:minHeight="40dp"
+                android:layout_marginEnd="4dp"
+                android:drawableStart="@drawable/ic_check_circle"
+                android:drawablePadding="8dp" />
 
             <Button
                 android:id="@+id/btn_edit"
@@ -235,7 +247,7 @@
                 android:textColor="#D32F2F"
                 android:backgroundTint="#FFEBEE"
                 android:minHeight="40dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
                 android:drawableStart="@drawable/ic_delete"
                 android:drawablePadding="8dp" />
         </LinearLayout>
