@@ -15,7 +15,8 @@ class InvoiceAdapter (
     private var invoices: List<InvoiceRequest>,
     private val onEditClick: (InvoiceRequest) -> Unit,
     private val onDeleteClick: (InvoiceRequest) -> Unit,
-    private val onMarkPaidClick: (InvoiceRequest) -> Unit
+    private val onMarkPaidClick: (InvoiceRequest) -> Unit,
+    private val onDownloadPDF: (InvoiceRequest) -> Unit
     ) : RecyclerView.Adapter<InvoiceAdapter.InvoiceViewHolder>() {
 
         fun updateData(newInvoices: List<InvoiceRequest>) {
@@ -66,6 +67,7 @@ class InvoiceAdapter (
             holder.btnEdit.setOnClickListener { onEditClick(invoice) }
             holder.btnDelete.setOnClickListener { onDeleteClick(invoice) }
             holder.btnMarkAsPaid.setOnClickListener { onMarkPaidClick(invoice) }
+            holder.btnDownloadPdf.setOnClickListener { onDownloadPDF(invoice) }
         }
 
         override fun getItemCount(): Int = invoices.size
@@ -81,5 +83,6 @@ class InvoiceAdapter (
             val btnEdit: Button = itemView.findViewById(R.id.btn_edit)
             val btnDelete: Button = itemView.findViewById(R.id.btn_delete)
             val btnMarkAsPaid: Button = itemView.findViewById(R.id.btn_mark_paid)
+            val btnDownloadPdf: Button = itemView.findViewById(R.id.btn_download_pdf)
         }
     }

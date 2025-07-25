@@ -221,7 +221,7 @@
                 android:textColor="#2E7D32"
                 android:backgroundTint="#E8F5E8"
                 android:minHeight="40dp"
-                android:layout_marginEnd="4dp"
+                android:layout_marginEnd="2dp"
                 android:drawableStart="@drawable/ic_check_circle"
                 android:drawablePadding="8dp" />
 
@@ -234,8 +234,21 @@
                 android:textColor="#FF9800"
                 android:backgroundTint="#FFF3E0"
                 android:minHeight="40dp"
-                android:layout_marginHorizontal="4dp"
+                android:layout_marginHorizontal="2dp"
                 android:drawableStart="@drawable/ic_edit"
+                android:drawablePadding="8dp" />
+
+            <Button
+                android:id="@+id/btn_download_pdf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="PDF"
+                android:textColor="#1976D2"
+                android:backgroundTint="#E3F2FD"
+                android:minHeight="40dp"
+                android:layout_marginHorizontal="2dp"
+                android:drawableStart="@drawable/ic_download"
                 android:drawablePadding="8dp" />
 
             <Button
@@ -247,7 +260,7 @@
                 android:textColor="#D32F2F"
                 android:backgroundTint="#FFEBEE"
                 android:minHeight="40dp"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="2dp"
                 android:drawableStart="@drawable/ic_delete"
                 android:drawablePadding="8dp" />
         </LinearLayout>

@@ -16,19 +16,20 @@ import com.css152l_am5_g8.accountingko.ui.invoice.CreateInvoiceActivity
 import com.css152l_am5_g8.accountingko.ui.login.LoginActivity
 import com.css152l_am5_g8.accountingko.api.AuthManager
 import com.css152l_am5_g8.accountingko.ui.invoice.InvoiceListActivity
-import com.css152l_am5_g8.accountingko.ui.register.RegisterActivity
+//import com.css152l_am5_g8.accountingko.ui.register.RegisterActivity
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.*
+import kotlin.math.absoluteValue
+import androidx.core.content.edit
 
 class DashboardActivity : AppCompatActivity() {
 
     // UI Components for main dashboard
-    private var searchEditText: EditText? = null
-    private var totalIncomeTextView: TextView? = null
-    private var totalExpensesTextView: TextView? = null
-    private var netProfitTextView: TextView? = null
+//    private var totalIncomeTextView: TextView? = null
+//    private var totalExpensesTextView: TextView? = null
+//    private var netProfitTextView: TextView? = null
     private var chartSpinner: Spinner? = null
     private var chartContainer: FrameLayout? = null
     private lateinit var totalRevenueTextView: TextView
@@ -36,10 +37,15 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var paidInvoicesTextView: TextView
     private lateinit var pendingInvoicesTextView: TextView
     private lateinit var btnInvoices: Button
+    private lateinit var btnLogout: Button
+
+    // Recent Invoices Container
+    private lateinit var recentInvoicesContainer: LinearLayout
+
     // Data
     private val invoices = mutableListOf<Invoice>()
-    private val transactions = mutableListOf<Transaction>()
-    private val expenses = mutableListOf<Expense>()
+//    private val transactions = mutableListOf<Transaction>()
+//    private val expenses = mutableListOf<Expense>()
 
     // Utils
     private val authManager by lazy { AuthManager(this) }
@@ -97,6 +103,10 @@ class DashboardActivity : AppCompatActivity() {
         pendingInvoicesTextView = findViewById(R.id.tv_pending_invoices)
         chartContainer = findViewById(R.id.chartContainer)
         btnInvoices = findViewById(R.id.btn_invoices)
+        btnLogout = findViewById(R.id.btn_logout)
+
+        // Find the recent invoices container - you'll need to add this ID to your XML
+        recentInvoicesContainer = findViewById(R.id.recent_invoices_container)
     }
 
     private fun setupNoInvoicesUI() {
@@ -107,14 +117,64 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupEventListeners() {
-//        searchEditText?.setOnEditorActionListener { _, _, _ ->
-//            performSearch(searchEditText?.text.toString())
-//            true
-//        }
         btnInvoices.setOnClickListener {
             val listIntent = Intent(this@DashboardActivity, InvoiceListActivity::class.java)
             startActivity(listIntent)
         }
+        btnLogout.setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
+    }
+
+    private fun showLogoutConfirmationDialog() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Logout")
+        builder.setMessage("Are you sure you want to logout?")
+
+        builder.setPositiveButton("Yes") { dialog, _ ->
+            performLogout()
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun performLogout() {
+        lifecycleScope.launch {
+            try {
+                showToast("Logging out...")
+                clearLocalData()
+                authManager.clearToken()
+                navigateToLoginAfterLogout()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during logout", e)
+                showError("Logout failed. Please try again.")
+            }
+        }
+    }
+
+    private fun clearLocalData() {
+        invoices.clear()
+//        transactions.clear()
+//        expenses.clear()
+
+        val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit { clear() }
+
+        Log.d(TAG, "Local data cleared")
+    }
+
+    private fun navigateToLoginAfterLogout() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupSpinner() {
@@ -168,14 +228,10 @@ class DashboardActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Load invoices first to determine layout
                 fetchInvoices()
 
-                // Load other data only if we have invoices (main dashboard)
                 if (invoices.isNotEmpty()) {
                     totalRevenue()
-                    fetchTransactions()
-//                    fetchExpenses()
                 }
 
             } catch (e: Exception) {
@@ -194,12 +250,10 @@ class DashboardActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Clear existing data
                 invoices.clear()
-                transactions.clear()
-                expenses.clear()
+//                transactions.clear()
+//                expenses.clear()
 
-                // Reload data
                 loadDashboardData()
 
             } catch (e: Exception) {
@@ -208,8 +262,6 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
     // ====================
     // API CALLS, GRAPH
@@ -228,10 +280,9 @@ class DashboardActivity : AppCompatActivity() {
 
                     Log.d(TAG, "Fetched ${invoices.size} invoices")
 
-                    // Update basic stats
                     updateInvoiceStats()
+                    updateRecentInvoices() // Add this line to update recent invoices
 
-                    // Load ONLY the paid invoices chart - safely
                     try {
                         chartContainer?.let { container ->
                             DashboardGraphHelper.loadDashboardGraphs(
@@ -242,10 +293,8 @@ class DashboardActivity : AppCompatActivity() {
                         } ?: Log.e(TAG, "Chart container is null")
                     } catch (e: Exception) {
                         Log.e(TAG, "Error loading chart", e)
-                        // Don't show error to user, just log it
                     }
 
-                    // Update total revenue
                     totalRevenue()
 
                 } else {
@@ -259,6 +308,7 @@ class DashboardActivity : AppCompatActivity() {
             showError("Failed to fetch invoices")
         }
     }
+
     private suspend fun getTotalSumOfInvoices(token: String): BigDecimal {
         val response = apiService.getInvoices("Bearer $token")
         if (response.isSuccessful) {
@@ -268,28 +318,11 @@ class DashboardActivity : AppCompatActivity() {
             throw Exception("Failed to fetch invoices: ${response.code()}")
         }
     }
-    private suspend fun fetchTransactions() {
-        try {
-            val token = authManager.getToken() ?: return
-            // TODO: Implement API call for transactions
-            updateRecentTransactions()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching transactions", e)
-        }
-    }
+
     private suspend fun totalRevenue(){
         val token = authManager.getToken()?: return
         val totalRevenue = getTotalSumOfInvoices(token)
         totalRevenueTextView?.text = currencyFormatter.format(totalRevenue)
-    }
-    private suspend fun fetchExpenses() {
-        try {
-            val token = authManager.getToken() ?: return
-            // TODO: Implement API call for expenses
-            updateExpenseStats()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching expenses", e)
-        }
     }
 
     // ====================
@@ -306,7 +339,6 @@ class DashboardActivity : AppCompatActivity() {
             switchToMainDashboardLayout()
         }
 
-        // Safely update UI elements
         try {
             totalInvoicesTextView.text = invoices.size.toString()
 
@@ -322,46 +354,145 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateExpenseStats() {
+    private fun updateRecentInvoices() {
         if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
 
-        // TODO: Calculate from actual expense data
-        val totalExpenses = 85000.0 // Mock data
-        totalExpensesTextView?.text = currencyFormatter.format(totalExpenses)
-        updateNetProfit()
+        try {
+            // Clear existing invoice views
+            recentInvoicesContainer.removeAllViews()
+
+            // Get the most recent 3 invoices (or less if fewer exist)
+            val recentInvoices = invoices
+                .sortedByDescending { it.createdAt } // Sort by creation date, most recent first
+                .take(3) // Take only the first 3 (most recent)
+
+            Log.d(TAG, "Displaying ${recentInvoices.size} recent invoices")
+
+            // Create views for each recent invoice
+            recentInvoices.forEach { invoice ->
+                val invoiceView = createRecentInvoiceView(invoice)
+                recentInvoicesContainer.addView(invoiceView)
+            }
+
+            // If no invoices, show a message
+            if (recentInvoices.isEmpty()) {
+                val noInvoicesView = createNoRecentInvoicesView()
+                recentInvoicesContainer.addView(noInvoicesView)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating recent invoices", e)
+        }
     }
 
-    private fun updateNetProfit() {
-        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
+    private fun createRecentInvoiceView(invoice: Invoice): View {
+        val invoiceLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 32 // 12dp margin bottom
+            }
+        }
 
-        val incomeText = totalIncomeTextView?.text?.toString() ?: "0"
-        val expenseText = totalExpensesTextView?.text?.toString() ?: "0"
+        // Create avatar (first 2 letters of client name)
+        val avatar = TextView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(96, 96) // 32dp x 32dp
+            text = getClientInitials(invoice.clientName)
+            textSize = 14f
+            setTextColor(resources.getColor(android.R.color.white, null))
+            gravity = android.view.Gravity.CENTER
+            setBackgroundColor(getAvatarColor(invoice.clientName))
+            setPadding(8, 8, 8, 8)
+        }
 
-        val income = parseCurrencyValue(incomeText)
-        val expenses = parseCurrencyValue(expenseText)
+        // Create client info layout
+        val clientInfoLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            ).apply {
+                marginStart = 36 // 12dp margin start
+            }
+        }
 
-        val netProfit = income - expenses
-        netProfitTextView?.text = currencyFormatter.format(netProfit)
+        // Client name
+        val clientName = TextView(this).apply {
+            text = invoice.clientName
+            textSize = 14f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(resources.getColor(android.R.color.black, null))
+        }
+
+        // Client email (if available)
+        val clientEmail = TextView(this).apply {
+            text = invoice.clientEmail ?: "No email provided"
+            textSize = 12f
+            setTextColor(resources.getColor(android.R.color.darker_gray, null))
+        }
+
+        clientInfoLayout.addView(clientName)
+        clientInfoLayout.addView(clientEmail)
+
+        // Amount
+        val amount = TextView(this).apply {
+            text = "+${currencyFormatter.format(invoice.total)}"
+            textSize = 14f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.CENTER_VERTICAL
+            }
+        }
+
+        // Add views to invoice layout
+        invoiceLayout.addView(avatar)
+        invoiceLayout.addView(clientInfoLayout)
+        invoiceLayout.addView(amount)
+
+        return invoiceLayout
     }
 
-    private fun updateRecentTransactions() {
-        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
-
-        // TODO: Implement dynamic transaction cards
-        Log.d(TAG, "Recent transactions updated")
+    private fun createNoRecentInvoicesView(): View {
+        return TextView(this).apply {
+            text = "No recent invoices found"
+            textSize = 14f
+            setTextColor(resources.getColor(android.R.color.darker_gray, null))
+            gravity = android.view.Gravity.CENTER
+            setPadding(16, 32, 16, 32)
+        }
     }
 
-    private fun updatePendingInvoices() {
-        if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
-
-        // TODO: Implement dynamic invoice cards
-        Log.d(TAG, "Pending invoices updated")
+    private fun getClientInitials(clientName: String): String {
+        return clientName.split(" ")
+            .take(2)
+            .map { it.firstOrNull()?.uppercaseChar() ?: "" }
+            .joinToString("")
+            .take(2)
     }
+
+    private fun getAvatarColor(clientName: String): Int {
+        val colors = arrayOf(
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_blue_light,
+            android.R.color.holo_red_light,
+            android.R.color.holo_purple
+        )
+        val index = clientName.hashCode().absoluteValue % colors.size
+        return resources.getColor(colors[index], null)
+    }
+
 
     private fun updateChartData(period: String) {
         if (currentLayoutType != LayoutType.MAIN_DASHBOARD) return
 
-        // TODO: Implement chart data update based on selected period
         Log.d(TAG, "Chart updated for period: $period")
         showToast("Chart updated for $period")
     }
@@ -370,36 +501,9 @@ class DashboardActivity : AppCompatActivity() {
     // USER ACTIONS
     // ====================
 
-    private fun performSearch(query: String) {
-        if (query.isBlank()) {
-            showToast("Please enter a search query")
-            return
-        }
-
-        // TODO: Implement search functionality
-        Log.d(TAG, "Searching for: $query")
-        showToast("Searching for: $query")
-    }
-
     private fun navigateToCreateInvoice() {
-        // TODO: Replace with actual CreateInvoiceActivity navigation
-        showToast("Navigate to Create Invoice")
-
-        // Example navigation:
         val intent = Intent(this, CreateInvoiceActivity::class.java)
         startActivity(intent)
-    }
-
-    // ====================
-    // UTILITY METHODS
-    // ====================
-
-    private fun parseCurrencyValue(currencyText: String): Double {
-        return try {
-            currencyText.replace("[^\\d.]".toRegex(), "").toDouble()
-        } catch (e: Exception) {
-            0.0
-        }
     }
 
     // ====================
@@ -465,15 +569,3 @@ data class Transaction(
     val date: String,
     val type: String // "income" or "expense"
 )
-
-data class Expense(
-    val id: String,
-    val description: String,
-    val category: String,
-    val amount: Double,
-    val date: String
-)
-
-// ====================
-// AUTH MANAGER
-// ====================

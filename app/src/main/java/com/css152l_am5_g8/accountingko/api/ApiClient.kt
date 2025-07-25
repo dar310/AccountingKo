@@ -32,7 +32,7 @@ object ApiClient {
         if (BASE_URL == null) {
             BASE_URL = runBlocking {
                 try {
-                    fetchGistContent("https://gist.githubusercontent.com/dar310/436aa20c117b11489fee3aa9781f0fc6/raw/tunnel_url.txt")
+                    fetchGistContent("https://gist.githubusercontent.com/dar310/667fedc58b2d442fcd878de125a3d2e7/raw/tunnel_url.txt")
                 } catch (e: Exception) {
                     Log.e("ApiClient", "Failed to fetch BASE_URL: ${e.message}")
                     "http://10.0.2.2:3000" // fallback

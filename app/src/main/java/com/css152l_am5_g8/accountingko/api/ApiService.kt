@@ -6,10 +6,12 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import com.google.gson.annotations.SerializedName
+import okhttp3.ResponseBody
 import retrofit2.http.DELETE
 import retrofit2.http.PATCH
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Streaming
 import java.math.BigDecimal
 
 // Data classes for requests and responses
@@ -194,4 +196,11 @@ interface ApiService {
         @Path("id") invoiceId: String,
         @Body request: StatusUpdateRequest
     ): Response<BasicResponse>
+
+    @Streaming
+    @GET("api/invoice/{id}")
+    suspend fun downloadInvoicePdf(
+        @Header("Authorization") token: String,
+        @Path("id") invoiceId: String
+    ): Response<ResponseBody>
 }

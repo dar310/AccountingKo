@@ -1,13 +1,16 @@
 package com.css152l_am5_g8.accountingko.ui.invoice
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.css152l_am5_g8.accountingko.api.ApiClient
 import com.css152l_am5_g8.accountingko.api.Invoice
@@ -19,6 +22,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.Locale
 
 class InvoiceListActivity : AppCompatActivity() {
@@ -58,6 +65,9 @@ class InvoiceListActivity : AppCompatActivity() {
             },
             onMarkPaidClick = { invoice ->
                 showMarkPaidConfirmationDialog(invoice)
+            },
+            onDownloadPDF = { invoice ->
+                downloadInvoicePdf(invoice)
             }
         )
 
@@ -102,7 +112,8 @@ class InvoiceListActivity : AppCompatActivity() {
         }
 
         adapter.updateData(filteredInvoiceList)
-        updateStats(filteredInvoiceList)
+        // Always update stats with the complete invoice list, not filtered results
+        updateStats(invoiceList) // Changed from filteredInvoiceList to invoiceList
         showEmptyState(filteredInvoiceList.isEmpty(), query.isNotEmpty())
     }
 
@@ -110,10 +121,10 @@ class InvoiceListActivity : AppCompatActivity() {
         return invoice.invoiceName.lowercase(Locale.getDefault()).contains(query) ||
                 invoice.invoiceNumber.toString().lowercase(Locale.getDefault()).contains(query) ||
                 invoice.clientName.lowercase(Locale.getDefault()).contains(query) ||
-                invoice.clientEmail.lowercase(Locale.getDefault()).contains(query) ||
-                invoice.status.lowercase(Locale.getDefault()).contains(query) ||
-                invoice.invoiceItemDescription.lowercase(Locale.getDefault()).contains(query) ||
-                invoice.total.toString().contains(query)
+//                invoice.clientEmail.lowercase(Locale.getDefault()).contains(query) ||
+                invoice.status.lowercase(Locale.getDefault()).contains(query)
+//                invoice.invoiceItemDescription.lowercase(Locale.getDefault()).contains(query) ||
+//                invoice.total.toString().contains(query)
     }
 
     private fun fetchInvoices() {
@@ -290,6 +301,124 @@ class InvoiceListActivity : AppCompatActivity() {
             }
         }
     }
+    private fun downloadInvoicePdf(invoice: InvoiceRequest) {
+        val token = AuthManager.getToken(this)
+        if (token == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val invoiceId = invoice.id
+        if (invoiceId == null) {
+            Toast.makeText(this, "Cannot download PDF: Missing invoice ID", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Show loading state
+        Toast.makeText(this, "Downloading PDF...", Toast.LENGTH_SHORT).show()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiClient.apiService.downloadInvoicePdf("Bearer $token", invoiceId)
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val responseBody = response.body()!!
+                        savePdfToFile(responseBody, invoice.invoiceName, invoice.invoiceNumber.toString())
+                    } else {
+                        Toast.makeText(
+                            this@InvoiceListActivity,
+                            "Failed to download PDF: ${response.code()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@InvoiceListActivity,
+                        "Error downloading PDF: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.e("PDFDownload", "Failed to download PDF", e)
+                }
+            }
+        }
+    }
+
+    private fun savePdfToFile(responseBody: ResponseBody, invoiceName: String, invoiceNumber: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Create filename
+                val fileName = "Invoice_${invoiceNumber}_${invoiceName.replace("[^a-zA-Z0-9]".toRegex(), "_")}.pdf"
+
+                // Get the Downloads directory
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (!downloadsDir.exists()) {
+                    downloadsDir.mkdirs()
+                }
+
+                val file = File(downloadsDir, fileName)
+
+                // Write the response body to file
+                val inputStream = responseBody.byteStream()
+                val outputStream = FileOutputStream(file)
+
+                val buffer = ByteArray(4096)
+                var bytesRead: Int
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                }
+
+                outputStream.close()
+                inputStream.close()
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@InvoiceListActivity,
+                        "PDF saved to Downloads folder",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    // Optionally open the PDF
+                    openPdf(file)
+                }
+            } catch (e: IOException) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@InvoiceListActivity,
+                        "Failed to save PDF: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.e("PDFDownload", "Failed to save PDF", e)
+                }
+            }
+        }
+    }
+
+    private fun openPdf(file: File) {
+        try {
+            val uri: Uri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "No PDF viewer app found", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e("PDFDownload", "Failed to open PDF", e)
+            Toast.makeText(this, "Failed to open PDF", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun deleteInvoice(invoice: InvoiceRequest) {
         val token = AuthManager.getToken(this)
@@ -357,7 +486,8 @@ class InvoiceListActivity : AppCompatActivity() {
         }
 
         adapter.updateData(filteredInvoiceList)
-        updateStats(filteredInvoiceList)
+        // Always show stats for complete invoice list, regardless of filters
+        updateStats(invoiceList) // Changed from filteredInvoiceList to invoiceList
         showEmptyState(filteredInvoiceList.isEmpty(), currentSearchQuery.isNotEmpty())
     }
 }
